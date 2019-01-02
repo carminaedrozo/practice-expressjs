@@ -1,6 +1,13 @@
 <% include partials/header.ejs %>
 <h1>Add Customer</h1>
-<form method = "POST" action="/users/add">
+<% if(errors != undefined) { %>
+    <% errors.array().forEach(function (e) { %>
+        <li>
+            <%= e.msg %>
+        </li>
+    <% }) %>
+<% } %>
+<form method="POST" action="/users/add">
     <label>First Name</label>
     <input type="text" name="first_name">
     <br>

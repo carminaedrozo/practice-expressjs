@@ -10,7 +10,8 @@
     "body-parser": "*",
     "ejs": "^2.6.1",
     "express": "*",
-    "express-validator": "^5.3.1"
+    "express-validator": "^5.3.1",
+    "mysql": "^2.16.0"
   },
   "author": "carmina",
   "license": "ISC"

@@ -1,9 +1,28 @@
-var express = require('express');
-var bodyParser = require('body-parser');
-var path = require('path');
-var {check, validationResult} = require('express-validator/check');
-var app = express();
+const express = require('express');
+const bodyParser = require('body-parser');
+const path = require('path');
+const {check, validationResult} = require('express-validator/check');
+const app = express();
+const mysql = require('mysql');
+const port = 3000;
 
+//create connection to database
+const db = mysql.createConnection({
+    host: 'localhost',
+    user: 'root',
+    password: '',
+    database: 'practice_users'
+});
+
+//connect to database
+db.connect((err) => {
+    if (err) {
+        throw err;
+    }
+    console.log('Connected to database');
+});
+
+global.db = db;
 // var logger = function(req, res, next){
 //     console.log('logging...');
 //     next();
@@ -20,6 +39,12 @@ app.use(bodyParser.urlencoded({extended: false}));
 
 //Set Static Path
 app.use(express.static(path.join(__dirname, 'public')));
+
+//Global Vars
+app.use(function (req, res, next) {
+    res.locals.errors = null;
+    next();
+});
 
 var users = [
     {
@@ -41,14 +66,19 @@ app.get('/', function (req, res) {
 });
 
 app.post('/users/add', [
-        check('first_name').not().isEmpty().withMessage('The First name is required'),
-        check('last_name').not().isEmpty().withMessage('The Last name is required'),
+        check('first_name').not().isEmpty().withMessage('The first name is required'),
+        check('last_name').not().isEmpty().withMessage('The last name is required'),
         check('email').isEmail().withMessage('Invalid email')
     ], function (req, res) {
         var errors = validationResult(req);
-        if(!errors.isEmpty()){
+        if (!errors.isEmpty()) {
             console.log(errors.array());
-        }else{
+            res.render('index', {
+                title: 'Customers',
+                users: users,
+                errors: errors
+            })
+        } else {
             var newUser = {
                 first_name: req.body.first_name,
                 last_name: req.body.last_name,
@@ -60,6 +90,6 @@ app.post('/users/add', [
     }
 )
 ;
-app.listen(3000, function () {
+app.listen(port, function () {
     console.log("Server started on port 3000....");
 });
