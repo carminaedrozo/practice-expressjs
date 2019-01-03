@@ -6,6 +6,8 @@ const app = express();
 const mysql = require('mysql');
 const port = 3000;
 
+const {getHomepage} = require('./routes/index');
+
 //create connection to database
 const db = mysql.createConnection({
     host: 'localhost',
@@ -46,24 +48,7 @@ app.use(function (req, res, next) {
     next();
 });
 
-var users = [
-    {
-        id: 1,
-        first_name: 'Inah',
-        last_name: 'Edrozo',
-        email: 'inahe@gmail.com'
-    }, {
-        id: 2,
-        first_name: 'David',
-        last_name: 'Velasquez',
-        email: 'dvelasquez@gmail.com'
-    }]
-app.get('/', function (req, res) {
-    res.render('index', {
-        title: 'Customers',
-        users: users
-    });
-});
+app.get('/', getHomepage);
 
 app.post('/users/add', [
         check('first_name').not().isEmpty().withMessage('The first name is required'),
@@ -75,16 +60,25 @@ app.post('/users/add', [
             console.log(errors.array());
             res.render('index', {
                 title: 'Customers',
+                //needs to be fixed
                 users: users,
                 errors: errors
             })
         } else {
-            var newUser = {
-                first_name: req.body.first_name,
-                last_name: req.body.last_name,
-                email: req.body.email,
-            }
-            console.log(newUser);
+
+            let first_name = req.body.first_name;
+            let last_name = req.body.last_name;
+            let email = req.body.email;
+
+            let query = "INSERT INTO `users` (first_name, last_name, email) VALUES (?,?,?)";
+            db.query(query, [first_name, last_name, email], (err, result)=>{
+                console.log(result);
+                if (err) {
+                    return res.status(500).send(err);
+                }
+                res.redirect('/');
+            });
+
         }
 
     }
