@@ -6,8 +6,8 @@ const app = express();
 const mysql = require('mysql');
 const port = 3000;
 
-const {getHomepage} = require('./routes/index');
-
+const {getHomepage, getEditPage} = require('./routes/index');
+const {addUser, deletePlayer, updatePlayer} = require('./routes/users')
 //create connection to database
 const db = mysql.createConnection({
     host: 'localhost',
@@ -51,39 +51,16 @@ app.use(function (req, res, next) {
 app.get('/', getHomepage);
 
 app.post('/users/add', [
-        check('first_name').not().isEmpty().withMessage('The first name is required'),
-        check('last_name').not().isEmpty().withMessage('The last name is required'),
-        check('email').isEmail().withMessage('Invalid email')
-    ], function (req, res) {
-        var errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            console.log(errors.array());
-            res.render('index', {
-                title: 'Customers',
-                //needs to be fixed
-                users: users,
-                errors: errors
-            })
-        } else {
+    check('first_name').not().isEmpty().withMessage('The first name is required'),
+    check('last_name').not().isEmpty().withMessage('The last name is required'),
+    check('email').isEmail().withMessage('Invalid email')
+], addUser);
 
-            let first_name = req.body.first_name;
-            let last_name = req.body.last_name;
-            let email = req.body.email;
+app.get('/user/delete/:id', deletePlayer);
 
-            let query = "INSERT INTO `users` (first_name, last_name, email) VALUES (?,?,?)";
-            db.query(query, [first_name, last_name, email], (err, result)=>{
-                console.log(result);
-                if (err) {
-                    return res.status(500).send(err);
-                }
-                res.redirect('/');
-            });
+app.get('/user/edit/:id', getEditPage);
 
-        }
-
-    }
-)
-;
+app.post('/user/update/:id', updatePlayer);
 app.listen(port, function () {
     console.log("Server started on port 3000....");
 });
